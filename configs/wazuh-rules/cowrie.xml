@@ -1,0 +1,103 @@
+<!-- Cowrie SSH honeypot rules -->
+<!-- Loads after 00_local_rules.xml (alphabetical order) -->
+<!-- Uses json decoder - Cowrie logs ingested as log_format=json by Wazuh agent -->
+
+<group name="cowrie,honeypot,">
+
+  <!-- Base rule: any Cowrie event (identified by eventid field starting with cowrie.) -->
+  <rule id="100050" level="3">
+    <decoded_as>json</decoded_as>
+    <field name="eventid">^cowrie\.</field>
+    <description>Cowrie honeypot event</description>
+    <group>cowrie,</group>
+  </rule>
+
+  <!-- New connection -->
+  <rule id="100051" level="5">
+    <if_sid>100050</if_sid>
+    <field name="eventid">^cowrie\.session\.connect$</field>
+    <description>Cowrie: New SSH connection from $(src_ip)</description>
+    <group>cowrie,connection,</group>
+  </rule>
+
+  <!-- Login failed -->
+  <rule id="100052" level="6">
+    <if_sid>100050</if_sid>
+    <field name="eventid">^cowrie\.login\.failed$</field>
+    <description>Cowrie: SSH login failed [$(username)] from $(src_ip)</description>
+    <group>cowrie,authentication_failed,</group>
+  </rule>
+
+  <!-- Login success -->
+  <rule id="100053" level="10">
+    <if_sid>100050</if_sid>
+    <field name="eventid">^cowrie\.login\.success$</field>
+    <description>Cowrie: SSH login SUCCESS [$(username):$(password)] from $(src_ip)</description>
+    <group>cowrie,authentication_success,</group>
+  </rule>
+
+  <!-- Command executed -->
+  <rule id="100054" level="8">
+    <if_sid>100050</if_sid>
+    <field name="eventid">^cowrie\.command\.input$</field>
+    <description>Cowrie: Attacker ran command from $(src_ip)</description>
+    <group>cowrie,command,</group>
+  </rule>
+
+  <!-- File download -->
+  <rule id="100055" level="12">
+    <if_sid>100050</if_sid>
+    <field name="eventid">^cowrie\.session\.file_download$</field>
+    <description>Cowrie: Malware download captured from $(src_ip)</description>
+    <group>cowrie,malware,</group>
+  </rule>
+
+  <!-- File upload -->
+  <rule id="100056" level="12">
+    <if_sid>100050</if_sid>
+    <field name="eventid">^cowrie\.session\.file_upload$</field>
+    <description>Cowrie: File uploaded by attacker from $(src_ip)</description>
+    <group>cowrie,malware,</group>
+  </rule>
+
+  <!-- Brute-force: 10 login failures in 60s -->
+  <!-- NOTE: no <same_field> - unsupported in Wazuh 4.14.2 -->
+  <rule id="100057" level="10" frequency="10" timeframe="60">
+    <if_matched_sid>100052</if_matched_sid>
+    <description>Cowrie: SSH brute-force - 10+ attempts in 60s</description>
+    <group>cowrie,brute_force,</group>
+  </rule>
+
+  <!-- Dangerous commands: payload/reverse-shell -->
+  <rule id="100058" level="12">
+    <if_sid>100054</if_sid>
+    <match>wget |curl |chmod .x|bash -i|/dev/tcp|python -c|perl -e|nc -e|mkfifo</match>
+    <description>Cowrie: Payload/reverse-shell command from $(src_ip)</description>
+    <group>cowrie,command,malware,</group>
+  </rule>
+
+  <!-- Cryptominer -->
+  <rule id="100059" level="12">
+    <if_sid>100054</if_sid>
+    <match>xmrig|minerd|stratum|cryptonight|monero|xmr-stak</match>
+    <description>Cowrie: Cryptominer deployment from $(src_ip)</description>
+    <group>cowrie,command,cryptominer,</group>
+  </rule>
+
+  <!-- Persistence attempt -->
+  <rule id="100060" level="10">
+    <if_sid>100054</if_sid>
+    <match>crontab|authorized_keys|/etc/rc.local|systemctl enable</match>
+    <description>Cowrie: Persistence attempt from $(src_ip)</description>
+    <group>cowrie,command,persistence,</group>
+  </rule>
+
+  <!-- FIM: new malware artifact in downloads dir -->
+  <rule id="100061" level="12">
+    <if_sid>554</if_sid>
+    <field name="file">/home/cowrie/cowrie/var/lib/cowrie/downloads/</field>
+    <description>Cowrie: New malware artifact captured</description>
+    <group>cowrie,malware,syscheck,</group>
+  </rule>
+
+</group>
