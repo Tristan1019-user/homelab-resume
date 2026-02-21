@@ -436,12 +436,12 @@
  </div>
  </div>
  <div class="card">
- <h3>Automated Email Triage Pipeline</h3>
- <p>Custom inbox automation that classifies incoming emails into action-required, informational, and low-priority categories. Creates draft replies for human review, archives noise, and posts summaries to Discord. Runs every 30 minutes via cron with zero manual intervention.</p>
+ <h3>Automated Vulnerability Scanning Pipeline</h3>
+ <p>Scheduled Greenbone/OpenVAS scans run MWF at 3AM via cron. Auto-starts the CT, runs full network scans across all VLANs, and shuts down after completion to conserve resources. Results feed into Wazuh for correlation with real-time alerts.</p>
  <div class="card-tags">
  <span class="card-tag red">custom-built</span>
+ <span class="card-tag green">vulnerability-management</span>
  <span class="card-tag amber">automation</span>
- <span class="card-tag">workflow</span>
  </div>
  </div>
  </div>
