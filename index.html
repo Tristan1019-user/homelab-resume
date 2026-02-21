@@ -299,7 +299,7 @@
  <span class="skill-pill" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 14px;border-radius:100px;background:rgba(245,158,11,0.08);color:var(--accent-warning);border:1px solid rgba(245,158,11,0.15);">🤖 N8N</span>
  <span class="skill-pill" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 14px;border-radius:100px;background:rgba(245,158,11,0.08);color:var(--accent-warning);border:1px solid rgba(245,158,11,0.15);">Python</span>
  <span class="skill-pill" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 14px;border-radius:100px;background:rgba(245,158,11,0.08);color:var(--accent-warning);border:1px solid rgba(245,158,11,0.15);">Bash</span>
- <span class="skill-pill" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 14px;border-radius:100px;background:rgba(245,158,11,0.08);color:var(--accent-warning);border:1px solid rgba(245,158,11,0.15);">OpenClaw AI</span>
+ <span class="skill-pill" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 14px;border-radius:100px;background:rgba(245,158,11,0.08);color:var(--accent-warning);border:1px solid rgba(245,158,11,0.15);">Cron Automation</span>
  <span class="skill-pill" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 14px;border-radius:100px;background:rgba(244,114,182,0.08);color:var(--accent-tertiary);border:1px solid rgba(244,114,182,0.15);">📊 Grafana</span>
  <span class="skill-pill" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 14px;border-radius:100px;background:rgba(244,114,182,0.08);color:var(--accent-tertiary);border:1px solid rgba(244,114,182,0.15);">Prometheus</span>
  <span class="skill-pill" style="font-family:var(--font-mono);font-size:0.75rem;padding:6px 14px;border-radius:100px;background:rgba(244,114,182,0.08);color:var(--accent-tertiary);border:1px solid rgba(244,114,182,0.15);">UptimeKuma</span>
@@ -436,12 +436,12 @@
  </div>
  </div>
  <div class="card">
- <h3>OpenClaw AI Agent Fleet</h3>
- <p>Multi-model AI agent orchestration across 4 Discord channels, each routing to a different LLM (Opus, Sonnet, Haiku, Ollama). Automated email triage every 30 minutes, security alert investigation via SSH, and natural language homelab control. 30+ automated cron workflows.</p>
+ <h3>Automated Email Triage Pipeline</h3>
+ <p>Custom inbox automation that classifies incoming emails into action-required, informational, and low-priority categories. Creates draft replies for human review, archives noise, and posts summaries to Discord. Runs every 30 minutes via cron with zero manual intervention.</p>
  <div class="card-tags">
  <span class="card-tag red">custom-built</span>
- <span class="card-tag pink">ai</span>
  <span class="card-tag amber">automation</span>
+ <span class="card-tag">workflow</span>
  </div>
  </div>
  </div>
@@ -768,7 +768,7 @@
  </div>
 
  <div class="arch-flow">
- <div class="arch-node">OpenClaw Cron<br><small>MWF 3AM CST</small></div>
+ <div class="arch-node">Scheduled Cron<br><small>MWF 3AM CST</small></div>
  <span class="arch-arrow">→</span>
  <div class="arch-node">CT 111 Auto-Start<br><small>Greenbone/OpenVAS</small></div>
  <span class="arch-arrow">→</span>
