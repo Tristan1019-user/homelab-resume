@@ -1,0 +1,132 @@
+<!-- Authentik + Caddy rules -->
+<!-- Uses native json decoder - no custom decoder needed -->
+<!-- Wazuh static fields (status, protocol, action, url, id, srcip, dstip, user, etc.) -->
+<!-- are auto-mapped by the JSON decoder and must use dedicated XML tags, NOT <field name=""> -->
+<!-- Dynamic fields (logger, level, event, state, etc.) use <field name=""> -->
+<!-- Caddy nested: request.host, request.uri, request.method, request.remote_ip are dynamic -->
+
+<group name="authentik,">
+
+  <!-- Base rule: any Authentik log event (identified by logger starting with authentik.) -->
+  <rule id="100100" level="0">
+    <decoded_as>json</decoded_as>
+    <field name="logger">^authentik\.</field>
+    <description>Authentik: log event</description>
+  </rule>
+
+  <!-- Authentication failure (password/identification stage) — MUST be before generic warning rule -->
+  <rule id="100103" level="6">
+    <if_sid>100100</if_sid>
+    <field name="logger" type="pcre2">stages\.(password|identification)</field>
+    <field name="level">warning</field>
+    <description>Authentik: Authentication failed - user: $(username)</description>
+    <group>authentik,authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+
+  <!-- WARNING level events (generic catch-all for non-auth warnings) -->
+  <rule id="100101" level="6">
+    <if_sid>100100</if_sid>
+    <field name="level">warning</field>
+    <description>Authentik: warning event - $(event)</description>
+    <group>authentik,warning,</group>
+  </rule>
+
+  <!-- ERROR level events -->
+  <rule id="100102" level="9">
+    <if_sid>100100</if_sid>
+    <field name="level">error</field>
+    <description>Authentik: error event - $(event)</description>
+    <group>authentik,error,</group>
+  </rule>
+
+  <!-- Brute-force: 5 auth failures in 60s -->
+  <rule id="100104" level="10" frequency="5" timeframe="60">
+    <if_matched_sid>100103</if_matched_sid>
+    <description>Authentik: Brute-force detected - multiple auth failures</description>
+    <group>authentik,brute_force,authentication_failed,</group>
+  </rule>
+
+  <!-- Flow execution success (login completed) -->
+  <!-- status is a static field - use <status> tag -->
+  <rule id="100105" level="3">
+    <if_sid>100100</if_sid>
+    <field name="logger">authentik\.asgi</field>
+    <status type="pcre2">^200$</status>
+    <field name="event" type="pcre2">/flows/executor/</field>
+    <description>Authentik: Flow execution success (login)</description>
+    <group>authentik,authentication_success,</group>
+  </rule>
+
+  <!-- Admin API mutations (user create/modify/delete) -->
+  <rule id="100106" level="5">
+    <if_sid>100100</if_sid>
+    <field name="logger">authentik\.asgi</field>
+    <field name="event" type="pcre2">/api/v3/core/users/</field>
+    <field name="method" type="pcre2">^(POST|PATCH|DELETE)$</field>
+    <description>Authentik: User management action</description>
+    <group>authentik,audit,</group>
+  </rule>
+
+  <!-- 401/403 responses -->
+  <!-- status is a static field - use <status> tag -->
+  <rule id="100107" level="5">
+    <if_sid>100100</if_sid>
+    <field name="logger">authentik\.asgi</field>
+    <status type="pcre2">^(401|403)$</status>
+    <description>Authentik: Unauthorized/forbidden response</description>
+    <group>authentik,unauthorized,</group>
+  </rule>
+
+  <!-- Worker task failures -->
+  <rule id="100108" level="7">
+    <if_sid>100100</if_sid>
+    <field name="state">FAILURE</field>
+    <description>Authentik: Worker task failed - $(task_name)</description>
+    <group>authentik,task_failure,</group>
+  </rule>
+
+</group>
+
+
+<group name="caddy,">
+
+  <!-- Base rule: any Caddy access log event (identified by logger starting with http.log.access) -->
+  <rule id="100200" level="0">
+    <decoded_as>json</decoded_as>
+    <field name="logger" type="pcre2">^http\.log\.access</field>
+    <description>Caddy: HTTP access log event</description>
+  </rule>
+
+  <!-- 4xx client errors -->
+  <!-- status is a static field - use <status> tag -->
+  <rule id="100201" level="4">
+    <if_sid>100200</if_sid>
+    <status type="pcre2">^4[0-9]{2}$</status>
+    <description>Caddy: HTTP 4xx error - $(request.method) $(request.host)$(request.uri)</description>
+    <group>caddy,http_error,</group>
+  </rule>
+
+  <!-- 403 Forbidden (blocked by CrowdSec or ACL) -->
+  <rule id="100202" level="6">
+    <if_sid>100201</if_sid>
+    <status type="pcre2">^403$</status>
+    <description>Caddy: 403 Forbidden - $(request.remote_ip) blocked on $(request.host)</description>
+    <group>caddy,blocked,crowdsec,</group>
+  </rule>
+
+  <!-- 5xx server errors -->
+  <rule id="100203" level="7">
+    <if_sid>100200</if_sid>
+    <status type="pcre2">^5[0-9]{2}$</status>
+    <description>Caddy: HTTP 5xx server error on $(request.host)</description>
+    <group>caddy,http_error,</group>
+  </rule>
+
+  <!-- Scanning: 10 x 4xx in 30s -->
+  <rule id="100204" level="9" frequency="10" timeframe="30">
+    <if_matched_sid>100201</if_matched_sid>
+    <description>Caddy: Possible web scan - rapid 4xx errors</description>
+    <group>caddy,web_scan,</group>
+  </rule>
+
+</group>
