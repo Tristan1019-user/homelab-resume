@@ -253,7 +253,7 @@
  <div class="stat-label">16 Virtual Functions</div>
  </div>
  <div class="stat">
- <div class="stat-value">129K+</div>
+ <div class="stat-value" id="stat-ioc-sessions">129K+</div>
  <div class="stat-label">IOC Sessions Indexed</div>
  </div>
  </div>
@@ -399,12 +399,24 @@
  </div>
  </div>
  <div class="card">
- <h3>IPv6 Dual-Stack with ULA VLANs</h3>
- <p>DHCPv6-PD from Comcast (public /64 on LAN) + ULA fdc8:7f3a:1e2b::/48 for VLANs. Custom radvd patch script + boot hook to survive dhcp6c renewals that wipe VLAN stanzas.</p>
+ <h3>IPv6 DNS Enforcement + Transport Hardening</h3>
+ <p>Full IPv6 DNS interception mirroring the IPv4 posture: pf <code>rdr inet6</code> on all interfaces forces port 53 → Technitium. KEA DHCPv6 (assisted mode, O-flag) + radvd RDNSS advertise Technitium's ULA IPv6 address. All encrypted DNS transports blocked: DoT (853 TCP), DoQ (8853 UDP), and DoH to 33 known providers on port 443 - Cloudflare and Quad9 explicitly allowed. Persistent patch script repairs kea-dhcp6.conf and radvd.conf after every OPNsense config regeneration.</p>
  <div class="card-tags">
  <span class="card-tag red">custom-built</span>
  <span class="card-tag">ipv6</span>
- <span class="card-tag">dual-stack</span>
+ <span class="card-tag green">dns-hardening</span>
+ <span class="card-tag amber">doh-blocked</span>
+ </div>
+ </div>
+ <div class="card">
+ <h3>Local AI Voice Assistant (ha-voice)</h3>
+ <p>Fully local, offline voice pipeline across 3 ESPHome ESP32-S3 mic satellites. Parakeet TDT 0.6B STT via Wyoming protocol with OpenVINO CPU EP (~160ms inference). FastAPI intent router: sub-50ms for simple commands using fuzzy semantic scoring with gap-ratio disambiguation; LLM compound routing for multi-entity commands. Piper TTS responses. Discord bridge for cross-channel control. All inference on-premises - no cloud STT or TTS.</p>
+ <div class="card-tags">
+ <span class="card-tag red">custom-built</span>
+ <span class="card-tag pink">llm</span>
+ <span class="card-tag green">on-prem-stt</span>
+ <span class="card-tag">esphome</span>
+ <span class="card-tag amber">openvino</span>
  </div>
  </div>
  <div class="card">
@@ -526,8 +538,8 @@
  <p>Attack data from the SOAR pipeline is published as a free, public threat intelligence API. Sessions are classified by a local LLM and mapped to MITRE ATT&CK techniques.</p>
  <ul>
  <li><span class="metric">129K+ sessions indexed</span>, 28K+ indicators, 20 VT-enriched malware samples from live attacks</li>
- <li><span class="metric">Streaming STIX 2.1</span> — async generator pages DB in batches; no OOM risk. TLP:CLEAR marking, kill chain phases, MITRE ATT&CK relationships</li>
- <li><span class="metric">TAXII 2.1 endpoint</span> — spec-compliant Envelope format, cursor pagination, <code>added_after</code> incremental sync, <code>X-TAXII-Date-Added-Last</code> header</li>
+ <li><span class="metric">Streaming STIX 2.1</span> - async generator pages DB in batches; no OOM risk. TLP:CLEAR marking, kill chain phases, MITRE ATT&CK relationships</li>
+ <li><span class="metric">TAXII 2.1 endpoint</span> - spec-compliant Envelope format, cursor pagination, <code>added_after</code> incremental sync, <code>X-TAXII-Date-Added-Last</code> header</li>
  <li><span class="metric">AI classification</span> via GPT-OSS 20B (local llama.cpp) with deterministic rule-based fallback</li>
  <li>MITRE ATT&CK: T1110 brute force, T1110.004 credential stuffing, malware deployment, cryptominer installation</li>
  <li>Rate limiting, pagination, filtering by threat level / attack type / time range. Released as <strong>v1.0.0-beta</strong></li>
@@ -538,10 +550,10 @@
  <div class="dash-widget" style="margin: 32px 0;">
  <div class="dash-header">
  <span class="dash-title">SOAR Pipeline  -  Recent Activity</span>
- <span class="dash-badge live">● Processing</span>
+ 
  </div>
  <div class="dash-body">
- <ul class="dash-feed">
+ <ul class="dash-feed" id="soar-feed">
  <li><span class="ts">00:14</span><span class="tx"><span class="act">BLOCKED</span> <span class="ip">198.51.100.23</span> <span class="geo">🇨🇳 Beijing, CN</span>  -  dual-block: CrowdSec 24h ban + OPNsense pf WAN rule</span></li>
  <li><span class="ts">00:14</span><span class="tx"><span class="act">ENRICHED</span> <span class="ip">198.51.100.23</span>  -  AS4134 China Telecom · ipwho.is GeoIP</span></li>
  <li><span class="ts">00:14</span><span class="tx"><span class="act">ALERT</span> Rule 100057  -  Cowrie: SSH brute-force · 14 attempts in 60s from <span class="ip">198.51.100.23</span></span></li>
@@ -552,7 +564,7 @@
  <li><span class="ts">00:04</span><span class="tx"><span class="act">SYNC</span> Blocklist reconciliation complete  -  13 active bans · 2 expired IPs purged from OPNsense pf table</span></li>
  <li><span class="ts">00:01</span><span class="tx"><span class="act">DIGEST</span> Daily security briefing posted to Discord #runner  -  1,847 alerts · 23 critical · 7 new bans</span></li>
  </ul>
- <div class="dash-note">Timestamps and IPs are representative  -  sanitized from live pipeline data</div>
+ <div class="dash-note">Sample data  -  representative of live pipeline activity</div>
  </div>
  </div>
 
@@ -612,7 +624,7 @@
  </div>
  <div class="card">
  <h3>Wazuh SIEM</h3>
- <p>Centralized SIEM with 7 active agents on Proxmox, Docker, Caddy, OPNsense, Cowrie, Zenbook, and workstation. 22 custom rules, FIM, and VirusTotal integration.</p>
+ <p>Centralized SIEM with 7 active agents on Proxmox, Docker, Caddy, OPNsense, Cowrie, Zenbook, and workstation. 26 custom rules, FIM, and VirusTotal integration.</p>
  <div class="card-tags"><span class="card-tag green">siem</span><span class="card-tag green">detection</span><span class="card-tag">7-agents</span></div>
  </div>
  <div class="card">
@@ -641,7 +653,7 @@
  <div class="dash-widget">
  <div class="dash-header">
  <span class="dash-title">Wazuh SIEM  -  24h Overview</span>
- <span class="dash-badge live">● Live</span>
+ 
  </div>
  <div class="dash-body">
  <div class="dash-stats">
@@ -658,7 +670,7 @@
  <div class="dash-stat-label">Agents Active</div>
  </div>
  <div class="dash-stat">
- <div class="dash-stat-value">22</div>
+ <div class="dash-stat-value">26</div>
  <div class="dash-stat-label">Custom Rules</div>
  </div>
  </div>
@@ -688,7 +700,7 @@
  <div class="dash-widget">
  <div class="dash-header">
  <span class="dash-title">CrowdSec  -  Active Decisions</span>
- <span class="dash-badge enforcing">● Enforcing</span>
+ 
  </div>
  <div class="dash-body">
  <div class="dash-stats">
@@ -717,7 +729,7 @@
  <tr><td>198.51.100.112</td><td>🇮🇳 IN</td><td>5h 19m</td><td>cryptominer-deploy</td><td>Wazuh SOAR</td></tr>
  </tbody>
  </table>
- <div class="dash-note">IPs shown are RFC 5737 documentation addresses  -  sanitized from live data</div>
+ <div class="dash-note">IPs are RFC 5737 documentation addresses  -  representative sample</div>
  </div>
  </div>
  </div>
@@ -797,13 +809,15 @@
  </div>
 
  <div class="highlight-card">
- <h3>IPv6 Dual-Stack</h3>
- <p>Full IPv6 deployment with Comcast DHCPv6-PD on LAN and ULA addressing for VLANs - a non-trivial configuration given ISP constraints.</p>
+ <h3>IPv6 Dual-Stack + DNS Enforcement</h3>
+ <p>Full IPv6 deployment with ULA addressing for VLANs and a complete DNS enforcement posture that mirrors IPv4 - both transports equally hardened.</p>
  <ul>
- <li>WAN: public /128 via DHCPv6; LAN: public /64 via track6 (Comcast only delegates /64, not /60)</li>
- <li>VLANs use ULA <code>fdc8:7f3a:1e2b::/48</code> since the /64 can't be subdivided for multiple subnets</li>
- <li>SLAAC via radvd on all interfaces; managed flag (M=1) on LAN for DHCPv6, pure SLAAC (M=0) on VLANs</li>
- <li>Custom patch script + boot hook to survive dhcp6c PD renewals that regenerate radvd.conf and wipe VLAN stanzas</li>
+ <li>VLANs use ULA <code>fdc8:7f3a:1e2b::/48</code>; SLAAC via radvd (M=0, O=1 assisted mode) with RDNSS advertising Technitium's IPv6 address</li>
+ <li>KEA DHCPv6 responds to INFORMATION-REQUEST with DNS options (stateless DHCPv6 - addresses from SLAAC, DNS from DHCPv6)</li>
+ <li>OPNsense pf <code>rdr inet6</code> intercepts all IPv6 port 53 traffic on every VLAN → Technitium <code>fdc8:7f3a:1e2b:1::2</code></li>
+ <li>DoT (853 TCP), DoQ (8853 UDP) blocked on all LAN interfaces. DoH blocked to 33 known providers via firewall alias; Cloudflare and Quad9 explicitly permitted</li>
+ <li>Persistent patch script repairs radvd.conf and kea-dhcp6.conf after every OPNsense config regeneration (runs every 10 min via cron)</li>
+ <li>avahi-daemon on OPNsense bridges mDNS across LAN, VLAN 30, VLAN 40, and workstation for AirPlay, HomeKit, and Spotify Connect discovery</li>
  </ul>
  </div>
 
@@ -814,9 +828,9 @@
  <div class="card-tags"><span class="card-tag green">802.1Q</span><span class="card-tag">isolation</span><span class="card-tag">default-deny</span></div>
  </div>
  <div class="card">
- <h3>Technitium DNS - Hardened</h3>
- <p>Self-hosted recursive DNS with DoH/DoT upstream. OPNsense intercepts ALL DNS queries (port 53/853) and redirects to Technitium - no client can bypass it. Full DNS visibility across all VLANs.</p>
- <div class="card-tags"><span class="card-tag green">dns-hardening</span><span class="card-tag">forced-routing</span><span class="card-tag">27-overrides</span></div>
+ <h3>Technitium DNS - Hardened (IPv4 + IPv6)</h3>
+ <p>Self-hosted recursive DNS with Cloudflare and Quad9 DoH upstreams. OPNsense intercepts ALL DNS (port 53) on both IPv4 and IPv6 via pf rdr rules - clients cannot bypass it. DoT (853), DoQ (8853), and DoH to 33 known providers explicitly blocked. mDNS reflected across VLANs via avahi for AirPlay and HomeKit discovery.</p>
+ <div class="card-tags"><span class="card-tag green">dns-hardening</span><span class="card-tag">ipv4+ipv6</span><span class="card-tag amber">dot-doq-blocked</span><span class="card-tag">mdns-reflector</span></div>
  </div>
  <div class="card">
  <h3>Cloudflare Tunnels + Caddy</h3>
@@ -952,9 +966,9 @@
  <div class="card-tags"><span class="card-tag">25gbe</span><span class="card-tag green">sr-iov</span><span class="card-tag">16-vfs</span></div>
  </div>
  <div class="card">
- <h3>Home Assistant + Alexa</h3>
- <p>Smart home automation with a custom AWS Lambda skill bridging Alexa voice control to on-premise Home Assistant - demonstrating hybrid cloud/edge patterns.</p>
- <div class="card-tags"><span class="card-tag amber">iot</span><span class="card-tag">aws-lambda</span><span class="card-tag">hybrid-cloud</span></div>
+ <h3>Home Assistant + Local AI Voice + Alexa</h3>
+ <p>Smart home automation with a fully local AI voice pipeline: 3 ESPHome ESP32-S3 satellites → wyoming-parakeet STT (OpenVINO, ~160ms) → custom intent router → HA actions in &lt;50ms. Custom AWS Lambda skill for Alexa hybrid cloud/edge fallback. No cloud dependency for voice.</p>
+ <div class="card-tags"><span class="card-tag amber">iot</span><span class="card-tag pink">on-prem-voice</span><span class="card-tag">aws-lambda</span><span class="card-tag green">esphome</span></div>
  </div>
  <div class="card">
  <h3>Utilities</h3>
@@ -1029,6 +1043,107 @@
  });
  btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
  });
+</script>
+
+<script>
+(function () {
+  var API = 'https://threat-intel.101904.xyz';
+
+  var MITRE_LABELS = {
+    'T1110.001': 'password guessing',
+    'T1110.004': 'credential stuffing',
+    'T1078':     'valid accounts',
+    'T1595':     'active scanning',
+    'T1595.002': 'vuln scanning',
+    'T1059.004': 'shell execution',
+    'T1105':     'tool transfer',
+    'T1082':     'system discovery',
+    'T1496':     'resource hijacking',
+    'T1046':     'network scan',
+    'T1033':     'user discovery',
+    'T1087':     'account discovery',
+  };
+
+  function flag(code) {
+    if (!code || code.length !== 2) return '🌐';
+    return String.fromCodePoint.apply(null,
+      code.toUpperCase().split('').map(function(c){ return 0x1F1E6 - 65 + c.charCodeAt(0); })
+    );
+  }
+
+  function relTime(iso) {
+    var s = (Date.now() - new Date(iso)) / 1000;
+    if (s < 60)    return Math.floor(s) + 's ago';
+    if (s < 3600)  return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+  }
+
+  function actionLabel(type, level, features) {
+    if (type === 'malware_deployment') return 'MALWARE';
+    if (type === 'cryptominer')        return 'BLOCKED';
+    if (level === 'critical')          return 'BLOCKED';
+    if (level === 'high')              return 'BLOCKED';
+    if (type === 'brute_force' || type === 'credential_stuffing') return 'BLOCKED';
+    if (features && features.successful_logins > 0) return 'PWNED';
+    return 'DETECTED';
+  }
+
+  function mitreStr(techniques) {
+    var t = Array.isArray(techniques) ? techniques : [];
+    try { if (!Array.isArray(t)) t = JSON.parse(techniques || '[]'); } catch(e) {}
+    return t.slice(0, 2).map(function(x){ return MITRE_LABELS[x] || x; }).join(' · ');
+  }
+
+  function fmtCount(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M+';
+    if (n >= 1000)    return Math.floor(n / 1000) + 'K+';
+    return String(n);
+  }
+
+  function renderFeed(sessions) {
+    var feed = document.getElementById('soar-feed');
+    if (!feed) return;
+    var html = '';
+    sessions.forEach(function(s) {
+      var action  = actionLabel(s.attack_type, s.threat_level, s.observed_features);
+      var f       = flag(s.country);
+      var country = s.country || '??';
+      var org     = s.org ? ' · ' + s.org : '';
+      var mitre   = mitreStr(s.mitre_techniques);
+      var typeStr = (s.attack_type || 'unknown').replace(/_/g, ' ');
+      html += '<li>'
+        + '<span class="ts">' + relTime(s.timestamp_start) + '</span>'
+        + '<span class="tx">'
+        +   '<span class="act">' + action + '</span> '
+        +   '<span class="ip">' + s.src_ip + '</span> '
+        +   '<span class="geo">' + f + ' ' + country + org + '</span>'
+        +   ' &mdash; ' + typeStr
+        +   (mitre ? ' <span style="color:var(--text-muted);font-size:0.74rem;">[' + mitre + ']</span>' : '')
+        + '</span>'
+        + '</li>';
+    });
+    feed.innerHTML = html;
+    // Update footnote
+    var note = feed.parentElement && feed.parentElement.querySelector('.dash-note');
+    if (note) note.textContent = 'Live data from threat-intel.101904.xyz - updated on page load';
+  }
+
+  // --- Fetch stats (hero counter) ---
+  fetch(API + '/api/v1/stats')
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      var el = document.getElementById('stat-ioc-sessions');
+      if (el && d.total_sessions) el.textContent = fmtCount(d.total_sessions);
+    })
+    .catch(function(){});
+
+  // --- Fetch recent sessions (SOAR feed) ---
+  fetch(API + '/api/v1/sessions?limit=10&order=desc')
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if (d.sessions && d.sessions.length) renderFeed(d.sessions); })
+    .catch(function(){});
+})();
 </script>
 
 </body>
